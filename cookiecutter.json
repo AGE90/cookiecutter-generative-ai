@@ -1,0 +1,17 @@
+{
+  "project_name": "My Project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_','-')}}",
+  "module_name": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+  "project_short_description": "A one-line summary of the project",
+  "author_name": "Your name or organization",
+  "author_email": "you@example.com",
+  "project_version": "0.1.0",
+  "project_url": "https://myproject.com",
+  "python_version": "3.11",
+  "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "GPL-3.0-or-later", "No license file"],
+  "package_manager": ["uv", "poetry", "pip-tools", "pip", "none"],
+  "project_dependencies": "pyprojroot,requests,pydantic,python-dotenv,langchain,langgraph",
+  "dev_dependencies": "ruff,black,isort,mypy,pytest,pre-commit,ipykernel",
+  "testing_dependencies": "pytest,pytest-cov,pytest-mock",
+  "initialize_git_repository": ["yes", "no"]
+}
