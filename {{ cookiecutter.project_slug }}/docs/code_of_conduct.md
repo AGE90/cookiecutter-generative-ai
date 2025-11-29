@@ -197,7 +197,7 @@ Positive contributions will be acknowledged in:
 This Code of Conduct may be revised at any time. The most current version will always be available in this repository. Material changes will be announced to the community.
 
 **Version**: 1.0  
-**Last Updated**: {{ "now" | strftime("%B %Y") }}
+**Last Updated**:
 
 ---
 
