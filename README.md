@@ -43,7 +43,7 @@ pip install cookiecutter
 ### 2. Generate Your Project
 
 ```bash
-cookiecutter gh:your-github-username/cookiecutter-generative-ai
+cookiecutter https://github.com/AGE90/cookiecutter-generative-ai.git
 ```
 
 Or use a local path:
