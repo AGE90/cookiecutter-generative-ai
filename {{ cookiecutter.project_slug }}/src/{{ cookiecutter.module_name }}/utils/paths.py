@@ -52,16 +52,16 @@ project_dir = make_dir_function("")
 
 # Define a comprehensive list of directory types
 dir_types: List[List[str]] = [
-    ["app"],                    # API functionalities
+    ["config"],                 # Configuration files (e.g., YAML, JSON)
     ["data"],                   # Base data folder
+    ["docs"],                   # Documentation files
+    ["examples"],               # Example scripts or notebooks
+    ["logs"],                   # Log files
     ["notebooks"],              # Jupyter notebooks folder
     ["references"],             # Reference materials
     ["reports"],                # Reports folder
     ["reports", "figures"],     # Figures for reports
     ["tests"],                  # Unit test files
-    ["docs"],                   # Documentation files
-    ["logs"],                   # Log files for running experiments or monitoring
-    ["config"],                 # Configuration files (e.g., YAML, JSON)
 ]
 
 # Use a dictionary to store dynamically created directory functions
@@ -74,15 +74,16 @@ for dir_type in dir_types:
 
 # Example usage:
 # You can now access directories dynamically via the dir_functions dictionary
+config_dir = dir_functions['config_dir']
 data_dir = dir_functions['data_dir']
+docs_dir = dir_functions['docs_dir']
+examples_dir = dir_functions['examples_dir']
+logs_dir = dir_functions['logs_dir']
 notebooks_dir = dir_functions['notebooks_dir']
 references_dir = dir_functions['references_dir']
 reports_dir = dir_functions['reports_dir']
 reports_figures_dir = dir_functions['reports_figures_dir']
 tests_dir = dir_functions['tests_dir']
-docs_dir = dir_functions['docs_dir']
-logs_dir = dir_functions['logs_dir']
-config_dir = dir_functions['config_dir']
 
 # # Example print statements to show directory paths
 # print(f"Data Directory: {data_dir}")
