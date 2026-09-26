@@ -77,12 +77,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.python-version
 
 #######################################
 # 📦 Virtual Env Tools (Poetry / Pipenv / PDM)
 #######################################
-#poetry.lock
 .pdm.toml
 __pypackages__/
 

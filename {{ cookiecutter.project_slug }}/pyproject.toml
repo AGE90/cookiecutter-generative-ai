@@ -1,0 +1,70 @@
+[project]
+name = "{{ cookiecutter.module_name }}"
+version = "{{ cookiecutter.project_version }}"
+description = "{{ cookiecutter.project_description }}"
+authors = [{ name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}" }]
+{%- if cookiecutter.license != "No license file" %}
+license = "{{ cookiecutter.license }}"
+{%- endif %}
+readme = "README.md"
+requires-python = ">={{ cookiecutter.python_version }}"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: {{ cookiecutter.python_version }}",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "{{ cookiecutter.project_url }}"
+Repository = "{{ cookiecutter.project_url }}"
+
+[project.scripts]
+{{ cookiecutter.project_slug }} = "{{ cookiecutter.module_name }}.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.11.0,<0.12"]
+build-backend = "uv_build"
+
+# `uv sync` / `uv run` install every dependency group by default
+[tool.uv]
+default-groups = "all"
+
+# Configure pytest
+[tool.pytest.ini_options]
+addopts = "--cov=src"
+testpaths = ["tests"]
+
+# Configure mypy
+[tool.mypy]
+mypy_path = "src"
+check_untyped_defs = true
+disallow_any_generics = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+no_implicit_reexport = true
+
+# Configure ruff (linter + formatter)
+[tool.ruff]
+line-length = 88
+target-version = "py{{ cookiecutter.python_version.replace('.', '') }}"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["{{ cookiecutter.module_name }}"]

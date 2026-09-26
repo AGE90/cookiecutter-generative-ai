@@ -1,86 +1,97 @@
 # Cookiecutter Generative AI Project Template
 
-A **Cookiecutter** template to jumpstart generative AI projects with a well-organized structure. This template is designed to help data scientists and machine learning engineers create consistent and scalable AI agent projects using modern tools like LangChain and LangGraph.
+A **Cookiecutter** template to jumpstart generative AI projects: a working tool-calling agent built with **LangGraph**, served with **FastAPI**, tested offline, and managed with **uv**.
 
 ---
 
 ## Features
 
-- **Multiple Package Managers**: Choose between `uv`, `poetry`, `pip-tools`, or `pip` for dependency management
-- **Pre-configured for Generative AI**: Includes LangChain, LangGraph, and essential AI libraries
-- **AI Agent Architecture**: Ready-to-use structure for building agents with planners, executors, and memory
-- **Multi-Agent Graph Support**: Pre-configured templates for complex agent workflows
-- **Modular Structure**: Organized directories for data, models, notebooks, APIs, and scripts
-- **Testing Framework**: Integrated pytest setup with coverage and mocking
-- **Code Quality Tools**: Pre-configured with Ruff, Black, isort, and mypy
-- **API Ready**: HTTP and WebSocket API templates included
-- **Best Practices**: Follows industry standards for project organization and code management
-- **License Options**: Choose from MIT, Apache-2.0, BSD-3-Clause, or GPL-3.0
-- **Extensible**: Easily customizable to fit specific project needs
+- **Working Agent**: A LangGraph loop (model -> tools -> model) with an example tool, ready to extend
+- **Any LLM Provider**: Anthropic, OpenAI or a local Ollama model, switchable with one `LLM_MODEL` setting
+- **HTTP API and CLI**: FastAPI app (`POST /chat`, interactive docs at `/docs`) and a command-line entry point
+- **Offline Tests**: A scripted fake LLM (including tool calls), so tests never need an API key or network
+- **Modern Python Development**: [uv](https://docs.astral.sh/uv/) for fast, reproducible dependency management
+- **Code Quality**: ruff (lint + format), mypy and pre-commit, passing out of the box
+- **Claude Code Skill**: Scaffold a project by asking Claude, in one command, without Claude writing the files ([see below](#claude-code-skill))
 
 ---
 
 ## Requirements
 
-- **Python 3.9+**
-- **[Cookiecutter](https://cookiecutter.readthedocs.io/en/latest/installation.html)** >= 2.0.0
-- **Package Manager** (optional, chosen during setup):
-  - [uv](https://docs.astral.sh/uv/) - Recommended for modern Python projects
-  - [Poetry](https://python-poetry.org/) - For traditional dependency management
-  - [pip-tools](https://pip-tools.readthedocs.io/) - For requirements.txt workflows
-  - pip - Standard Python package installer
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)**: runs Cookiecutter (via `uvx`), installs Python and manages the project's dependencies
+- **Git** (optional, for version control)
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+No separate Cookiecutter install is needed: `uvx cookiecutter ...` runs it in a throwaway environment.
 
 ---
 
-## Quick Start
+## How to Start a New Project
 
-### 1. Install Cookiecutter
-
-```bash
-pip install cookiecutter
-```
-
-### 2. Generate Your Project
+### Interactive
 
 ```bash
-cookiecutter https://github.com/AGE90/cookiecutter-generative-ai.git
+uvx cookiecutter gh:AGE90/cookiecutter-generative-ai
 ```
 
-Or use a local path:
+Cookiecutter asks for each option and creates the project. The post-generation hook then pins Python, adds every dependency group with `uv add`, creates `.env` from `.env.example` and initializes Git if selected.
+
+### Non-interactive
+
+Pass the options on the command line and skip the prompts. Any option you leave out uses its default:
 
 ```bash
-cookiecutter /path/to/cookiecutter-generative-ai
+uvx cookiecutter gh:AGE90/cookiecutter-generative-ai --no-input \
+  project_name="Support Agent" \
+  author_name="Jane Doe" author_email="jane@example.com" \
+  llm_provider=openai
 ```
 
-### 3. Answer the Prompts
+### Next steps
 
-You'll be asked to provide:
+```bash
+cd support-agent
+# add your API key to .env, then:
+make run Q="What time is it?"   # ask the agent from the command line
+make serve                      # API on http://127.0.0.1:8000 (docs at /docs)
+make check && make test         # lint, type-check and run the offline tests
+```
 
-- **project_name**: Your project's display name (e.g., "My AI Agent")
-- **project_slug**: URL-friendly name (auto-generated, e.g., "my-ai-agent")
-- **module_name**: Python module name (auto-generated, e.g., "my_ai_agent")
-- **project_short_description**: One-line project summary
-- **author_name**: Your name or organization
-- **author_email**: Contact email
-- **project_version**: Initial version (default: "0.1.0")
-- **project_url**: Project homepage URL
-- **python_version**: Python version (default: "3.11")
-- **license**: Choose from MIT, Apache-2.0, BSD-3-Clause, GPL-3.0, or none
-- **package_manager**: Choose uv, poetry, pip-tools, pip, or none
-- **project_dependencies**: Comma-separated list (default includes langchain, langgraph)
-- **dev_dependencies**: Development tools (default includes ruff, pytest, mypy)
-- **testing_dependencies**: Testing libraries (default includes pytest-cov, pytest-mock)
-- **initialize_git_repository**: Create git repo automatically (yes/no)
+---
 
-### 4. Project Setup Complete
+## Claude Code Skill
 
-The post-generation hook will automatically:
+The repo ships a [Claude Code](https://claude.com/claude-code) skill in [`skill/genai-project/SKILL.md`](skill/genai-project/SKILL.md) that lets Claude create projects from this template.
 
-- Create the project structure
-- Initialize your chosen package manager
-- Install dependencies (if package manager is selected)
-- Set up git repository (if selected)
-- Generate `pyproject.toml` (for uv/poetry) or `requirements.txt` (for pip-tools/pip)
+### How it works
+
+The skill does **not** contain the template files. It tells Claude to work out the options from your request and run the single non-interactive `cookiecutter` command shown above. Cookiecutter writes the files, not Claude, so:
+
+- **Low token cost:** Claude reads one short skill file and runs one command, instead of writing every file.
+- **Same result every time:** projects are identical to the ones you'd get by running Cookiecutter yourself.
+- **One source of truth:** improving the template improves the skill; there is nothing to keep in sync.
+
+Every generated project also includes a `CLAUDE.md` with the project layout and conventions (where tools go, how the model is configured, offline tests with the fake LLM), so Claude follows them when working inside the project later.
+
+### Install
+
+Link the skill into your personal skills folder, so it updates whenever you `git pull` this repo:
+
+```bash
+git clone https://github.com/AGE90/cookiecutter-generative-ai.git
+ln -s "$PWD/cookiecutter-generative-ai/skill/genai-project" ~/.claude/skills/genai-project
+```
+
+### Use
+
+Start Claude Code in the folder where the project should go and ask for it, e.g.:
+
+> Create an LLM agent project called "Support Agent" that answers customer questions, using Claude.
+
+Or invoke it directly with `/genai-project`. Claude asks only for what it can't infer (usually just the name), takes your author details from `git config`, runs the command and reports the created path. You add the API key to `.env` yourself.
 
 ---
 
@@ -88,152 +99,122 @@ The post-generation hook will automatically:
 
 ```text
 your-project/
-├── .gitignore                          # Python-specific ignores
-├── LICENSE                             # Your chosen license
-├── README.md                           # Project documentation
-├── pyproject.toml                      # Package config (uv/poetry)
-├── config/                             # Configuration files
-├── data/                               # Data storage
-├── docs/                               # Documentation
-├── examples/                           # Usage examples
-├── logs/                               # Application logs
-├── notebooks/                          # Jupyter notebooks
-├── references/                         # Reference materials
-├── reports/
-│   └── figures/                        # Report visualizations
-├── src/
-│   └── your_module/
-│       ├── __init__.py
-│       ├── agents/                     # Agent implementations
-│       │   ├── base_agent.py
-│       │   ├── executor.py
-│       │   ├── planner.py
-│       │   ├── memory/                 # Agent memory systems
-│       │   └── tools/                  # Agent tools
-│       ├── api/
-│       │   ├── http/                   # REST API
-│       │   │   ├── dependencies.py
-│       │   │   ├── models/
-│       │   │   └── routers/
-│       │   └── websocket/              # WebSocket API
-│       ├── config/                     # Configuration modules
-│       ├── graphs/                     # LangGraph definitions
-│       │   ├── agent_graph.py
-│       │   ├── multi_agent_graph.py
-│       │   └── state_definitions.py
-│       ├── models/                     # LLM clients
-│       │   ├── llm_client.py
-│       │   └── prompts/
-│       ├── utils/
-│       │   └── paths.py                # Path utilities
-│       └── workflows/                  # Workflow definitions
-└── tests/                              # Unit tests
+├── CLAUDE.md               <- Project conventions for Claude Code
+├── LICENSE                 <- Omitted when "No license file" is selected
+├── Makefile                <- Tasks: install, run, serve, check, test (`make help`)
+├── README.md               <- Install, configuration, usage and structure
+├── pyproject.toml          <- Metadata, dependency groups and tool configuration
+├── uv.lock                 <- Locked dependency versions (commit it)
+├── .python-version         <- Python version pinned by uv
+├── .env.example            <- LLM_MODEL and the provider's API key variable
+├── .env                    <- Your local copy (git-ignored)
+├── .pre-commit-config.yaml <- ruff + mypy hooks
+├── config/                 <- Configuration files
+├── data/                   <- Data for the agent (documents, datasets)
+├── docs/
+│   ├── developer_guide.md  <- Architecture, testing, Git workflow and contributing
+│   └── code_of_conduct.md
+├── examples/               <- Example scripts
+├── logs/                   <- Log files
+├── notebooks/              <- Exploration notebooks
+├── references/             <- Papers, manuals, notes
+├── reports/figures/        <- Generated figures
+├── src/your_module/
+│   ├── __main__.py         <- CLI: `uv run your-project "question"`
+│   ├── api.py              <- FastAPI app: GET /health, POST /chat
+│   ├── config.py           <- Settings from .env
+│   ├── graph.py            <- LangGraph agent: build_graph(), ask()
+│   ├── llm.py              <- Chat model factory: get_llm()
+│   ├── tools.py            <- Tools the agent can call
+│   └── utils/paths.py      <- Project-relative path helpers
+└── tests/
+    ├── conftest.py         <- `fake_llm` fixture: scripted messages, no network
+    ├── test_api.py
+    └── test_graph.py
 ```
 
 ---
 
-## Package Manager Details
+## Project Setup Options
 
-### Using `uv` (Recommended)
+### Project Name, Slug and Module Name
 
-```bash
-cd your-project
-uv sync                                 # Sync dependencies
-uv add package-name                     # Add new package
-uv add --dev package-name               # Add dev package
-uv run python script.py                 # Run with uv
-```
+`project_name` is the human-readable title. `project_slug` (the directory name and CLI command) and `module_name` (the Python package) are derived from it: "Support Agent" becomes `support-agent` and `support_agent`. The slug must be lowercase letters, digits and single hyphens; the module name must be a valid Python identifier.
 
-### Using `poetry`
+### Author, Description, URL and Version
 
-```bash
-cd your-project
-poetry install                          # Install dependencies
-poetry add package-name                 # Add new package
-poetry add --group dev package-name     # Add dev package
-poetry run python script.py             # Run with poetry
-```
+`author_name`, `author_email`, `project_description`, `project_url` and `project_version` fill in `pyproject.toml` and the README. The email and URL are validated before anything is generated.
 
-### Using `pip-tools`
+### Python Version
 
-```bash
-cd your-project
-pip-sync requirements-dev.txt           # Sync environment
-# Edit requirements.in, then:
-pip-compile requirements.in             # Compile requirements
-pip-compile requirements-dev.in         # Compile dev requirements
-```
+`python_version` is the minimum Python version (`requires-python`), the ruff target version and the version pinned by uv in `.python-version`. It must have the format `3.X` and be at least `3.11`. By default it is set to `3.12`.
 
-### Using `pip`
+### License
 
-```bash
-cd your-project
-pip install -r requirements.txt         # Install dependencies
-```
+One of `MIT`, `Apache-2.0`, `BSD-3-Clause`, `GPL-3.0-or-later`, or `No license file` (no `LICENSE` file and no `license` field in `pyproject.toml`).
 
----
+### LLM Provider
 
-## What Gets Configured Automatically
+`llm_provider` picks the LangChain integration package, the default `LLM_MODEL` and the API key variable in `.env.example`:
 
-The template includes intelligent post-generation hooks that:
+| Provider | Package | Default `LLM_MODEL` | Key |
+|---|---|---|---|
+| `anthropic` (default) | `langchain-anthropic` | `anthropic:claude-opus-5` | `ANTHROPIC_API_KEY` |
+| `openai` | `langchain-openai` | `openai:gpt-5` | `OPENAI_API_KEY` |
+| `ollama` | `langchain-ollama` | `ollama:llama3.2` | none (runs locally) |
 
-1. **Validate inputs** (pre-generation):
-   - Ensures module names are valid Python identifiers
-   - Validates project slug format
-   - Checks email and URL formats
-   - Verifies Python version compatibility
+The model can be changed at any time by editing `LLM_MODEL` in `.env`.
 
-2. **Set up package management** (post-generation):
-   - Creates `pyproject.toml` with your chosen dependencies (uv/poetry)
-   - Generates `requirements.in` and compiles to `.txt` (pip-tools)
-   - Creates basic `requirements.txt` (pip)
-   - Installs all specified dependencies automatically
+### Initialize Environment
 
-3. **Initialize version control** (optional):
-   - Creates git repository
-   - Makes initial commit with all generated files
+If `initialize_env` is `yes`, the post-generation hook pins the Python version and adds every dependency group below with `uv add` (creating `.venv` and `uv.lock`). Select `no` to only generate the files; you can run `make install` later.
 
----
+### Dependencies
 
-## Customization
+| Option | Group | Default |
+|---|---|---|
+| `project_dependencies` | main | `langchain, langgraph, fastapi, uvicorn[standard], python-dotenv, pyprojroot` (plus the provider package) |
+| `extra_dependencies` | main | empty: packages added **on top of** the defaults, e.g. `"langchain-community, chromadb"` |
+| `development_dependencies` | `dev` | `mypy, ruff, pre-commit, ipykernel` |
+| `testing_dependencies` | `test` | `pytest, pytest-cov, httpx` |
 
-### Adding Custom Dependencies
+The template code uses every default main dependency, so add packages with `extra_dependencies` rather than replacing `project_dependencies`.
 
-Edit `cookiecutter.json` to change default dependencies:
+### Initialize Git Repository
 
-```json
-{
-  "project_dependencies": "langchain,langgraph,openai,anthropic",
-  "dev_dependencies": "ruff,black,pytest,mypy"
-}
-```
-
-### Modifying Project Structure
-
-Add or remove directories in `{{ cookiecutter.project_slug }}/` before generating projects.
-
-### Customizing Hooks
-
-Edit `hooks/pre_gen_project.py` or `hooks/post_gen_project.py` to add validation or setup steps.
+If `initialize_git_repository` is `yes`, the hook runs `git init` and commits the generated project.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! If you'd like to improve this template, feel free to submit a pull request.
+
+1. Fork the repository.
+2. Create a new branch for your feature (`git checkout -b feature/your-feature`).
+3. Make your changes.
+4. Run the template tests (they render the template with several option combinations and check the output):
+
+    ```bash
+    uvx --with cookiecutter pytest tests/
+    ```
+
+5. Submit a pull request.
+
+CI also generates real projects for several providers and runs `make check && make test` inside each.
 
 ---
 
 ## License
 
-This template itself is MIT licensed. Generated projects will use the license you select during setup.
+This template itself is MIT licensed. Generated projects use the license you select during setup.
 
 ---
 
 ## Resources
 
 - [Cookiecutter Documentation](https://cookiecutter.readthedocs.io/)
-- [LangChain Documentation](https://python.langchain.com/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- [LangChain Documentation](https://python.langchain.com/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [uv Documentation](https://docs.astral.sh/uv/)
-- [Poetry Documentation](https://python-poetry.org/docs/)

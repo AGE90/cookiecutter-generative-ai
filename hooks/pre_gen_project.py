@@ -7,7 +7,7 @@ Validates:
 - `project_slug` is a lower-case hyphen-separated slug.
 - `author_email` (only if provided) matches a simple email pattern.
 - `project_url` (only if provided) looks like a URL (has scheme+netloc).
-- `python_version` (only if provided) matches "3.x" or "3.x.y" and meets a minimum (default 3.9).
+- `python_version` matches "3.x" and meets a minimum (3.11).
 """
 
 import keyword
@@ -16,16 +16,10 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
-# Try optional colored output (do not require colorama)
-try:
-    from colorama import Fore, Style, just_fix_windows_console # type: ignore
-
-    just_fix_windows_console()
-    ERR = Fore.RED
-    INFO = Fore.CYAN
-    RESET = Style.RESET_ALL
-except ImportError:
-    ERR = INFO = RESET = ""
+# Colored output with plain ANSI codes (stdlib only)
+ERR = "\033[31m"
+INFO = "\033[36m"
+RESET = "\033[0m"
 
 # Cookiecutter variables (filled by cookiecutter)
 PROJECT_NAME = "{{ cookiecutter.project_name }}"
@@ -39,9 +33,9 @@ PYTHON_VERSION = "{{ cookiecutter.python_version }}"
 MODULE_REGEX = r"^[_a-zA-Z][_a-zA-Z0-9]*$"
 SLUG_REGEX = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
 EMAIL_REGEX = r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
-PYTHON_REGEX = r"^3\.\d+(\.\d+)?$"
+PYTHON_REGEX = r"^3\.\d+$"
 
-MIN_PYTHON_MINOR = 9  # require at least 3.9; change to 10 if you prefer 3.10+
+MIN_PYTHON_MINOR = 11  # 3.10 is end-of-life; template code uses 3.11 features
 
 
 def die(msg: str) -> None:
@@ -139,7 +133,7 @@ def validate_url(url: str) -> None:
 
 
 def validate_python_version(version: str) -> None:
-    """Validate that the Python version matches "3.x" or "3.x.y" and meets a minimum.
+    """Validate that the Python version matches "3.x" and meets a minimum.
 
     Parameters
     ----------
@@ -147,10 +141,9 @@ def validate_python_version(version: str) -> None:
         The Python version to validate.
     """
     if not version or version.strip() == "":
-        info("No `python_version` provided — skipping Python version validation.")
-        return
+        die("`python_version` is empty. Provide a version like '3.12'.")
     if not re.match(PYTHON_REGEX, version):
-        die("`python_version` must look like '3.x' or '3.x.y' (example: '3.11').")
+        die("`python_version` must look like '3.x' (example: '3.12').")
     parts = version.split(".")
     try:
         major = int(parts[0])
@@ -177,8 +170,8 @@ def main() -> None:
     validate_python_version(PYTHON_VERSION)
 
     # Report where the project will be created
-    full_path = Path.cwd() / PROJECT_SLUG
-    info(f"Project '{PROJECT_NAME}' will be created in: {full_path}")
+    # Cookiecutter runs this hook from inside the new project directory
+    info(f"Project '{PROJECT_NAME}' will be created in: {Path.cwd()}")
 
 
 if __name__ == "__main__":
